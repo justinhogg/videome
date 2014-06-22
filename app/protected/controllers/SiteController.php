@@ -32,18 +32,24 @@ class SiteController extends Controller
 		$this->render('index');
 	}
         
+        /**
+         * addVideo action allows the user to add their video
+         */
         public function actionAddVideo(){
-            
+            //allow this only if the request is made via ajax
             if(Yii::app()->request->isAjaxRequest){
                 //TODO perform sanitization
                 $video = new Video();
                 
+                //set vars
                 $result = array(
                     'result' => NULL,
                     'msg'    => NULL,
                     'errors' => array(),
                 );
                 
+                //extract the data that we need
+                //TODO filter this out client side and send over only attributes we need
                 (isset($_POST['uuid'])) ? $video->uuid = $_POST['uuid']:false;
                 (isset($_POST['camera_uuid'])) ? $video->uuidCamera = $_POST['camera_uuid']:false;
                 (isset($_POST['formats']['qvga']['video_url'])) ? $video->urlVideo = $_POST['formats']['qvga']['video_url']:false;
@@ -51,6 +57,7 @@ class SiteController extends Controller
                 (isset($_POST['formats']['qvga']['small_thumb_url'])) ? $video->urlThumbnailSmall = $_POST['formats']['qvga']['small_thumb_url']:false;
                 (isset($_POST['state'])) ? $video->status = $_POST['state']:false;
                 
+                //validate and save attributes
                 if($video->validate() && $video->save()){
                     $result['result']   = 'success';
                     $result['data'] = $video->attributes;
@@ -59,19 +66,23 @@ class SiteController extends Controller
                     $result['msg']      = 'There were errors with your submission!';
                     $result['errors']   = CJSON::decode($video->getErrors());
                 }
-                
+                //exits with response
                 exit(CJSON::encode($result));
             }else {
                 $this->render('error', array('code'=>500, 'message' => 'There was a problem accessing this page!'));
             }
         }
         
+        /**
+         * deleteVideo action allows the user to delete their video
+         */
         public function actionDeleteVideo(){
-            
+            //allow this only if the request is made via ajax
             if(Yii::app()->request->isAjaxRequest){
                 //TODO perform sanitization
                 $params = $this->getActionParams();
 
+                //set vars
                 $result = array(
                     'result' => NULL,
                     'msg'    => NULL,
@@ -86,6 +97,7 @@ class SiteController extends Controller
                 //if the record exists and uuid is set then delete it
                 if(isset($uuid) && $video->exists('uuid = :uuid', array(':uuid' => $uuid))){
                     //TODO getting a unauthorised error on $video->deleteFromProvider($uuid)
+                    //delete the video locally and remotely
                     if($video->deleteByPk($uuid)){
                         $result = array(
                             'result' => 'success',
@@ -103,6 +115,7 @@ class SiteController extends Controller
                         'msg'    => 'Video does not exists or Uuid is not valid',
                     );
                 }
+                //exits with a response
                 exit(CJSON::encode($result));
             } else {
                 $this->render('error', array('code'=>500, 'message' => 'There was a problem accessing this page!'));
