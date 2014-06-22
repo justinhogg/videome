@@ -14,3 +14,11 @@ Please make sure videome/app/protected/assets is a directory writable by the Web
 
 To run the application, please make sure the Web-accessible directory videome/app/index.php is set up in a virtual host with .htaccess rights.
 
+DATABASE INSTALLATION
+------------
+
+Create a UTF8 schema named "videome" then run:
+
+cd videome/app/protected
+
+./yiic migrate up
